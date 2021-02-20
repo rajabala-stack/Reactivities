@@ -1,18 +1,12 @@
+import { observer } from "mobx-react-lite";
 import React, { SyntheticEvent, useState } from "react";
 import { Button, Item, Label, Segment } from "semantic-ui-react";
 import { Activity } from "../../../app/models/activity";
-interface Props {
-  activities: Activity[];
-  selectActivity: (id: string) => void;
-  deleteActivity: (id: string) => void;
-  submitting: boolean;
-}
-export default function ActivityList({
-  activities,
-  selectActivity,
-  deleteActivity,
-  submitting,
-}: Props) {
+import { useStore } from "../../../app/stores/store";
+
+const ActivityList = () => {
+  const { activityStore } = useStore();
+  const { activitesByDate, loading, deleteActivity } = activityStore;
   const [currentTarget, setCurrentTarget] = useState("");
   const handleDeleteActivity = (
     e: SyntheticEvent<HTMLButtonElement>,
@@ -23,10 +17,11 @@ export default function ActivityList({
     }
     deleteActivity(id);
   };
+
   return (
     <Segment>
       <Item.Group>
-        {activities.map((activity: Activity) => (
+        {activitesByDate.map((activity: Activity) => (
           <Item key={activity.id}>
             <Item.Content>
               <Item.Header as="a">{activity.title}</Item.Header>
@@ -39,7 +34,7 @@ export default function ActivityList({
               </Item.Description>
               <Item.Extra>
                 <Button
-                  onClick={() => selectActivity(activity.id)}
+                  onClick={() => activityStore.selectActivity(activity.id)}
                   floated="right"
                   content="View"
                   color="blue"
@@ -50,7 +45,7 @@ export default function ActivityList({
                   floated="right"
                   content="Delete"
                   color="red"
-                  loading={submitting && currentTarget === activity.id}
+                  loading={loading && currentTarget === activity.id}
                 />
                 <Label basic content={activity.category} />
               </Item.Extra>
@@ -60,4 +55,6 @@ export default function ActivityList({
       </Item.Group>
     </Segment>
   );
-}
+};
+
+export default observer(ActivityList);
